@@ -163,7 +163,7 @@ def request_configuration(host, hass, add_devices_callback, filename):
         hass, "Philips Hue", hue_configuration_callback,
         description=("Press the button on the bridge to register Philips Hue "
                      "with Home Assistant."),
-        description_image="/static/images/config_philips_hue.jpg",
+        description_image="static/images/config_philips_hue.jpg",
         submit_caption="I have pressed the button"
     )
 

@@ -13,11 +13,12 @@ from http.server import SimpleHTTPRequestHandler, HTTPServer
 import json
 import logging
 import os
+import re
 from socketserver import ThreadingMixIn
 import ssl
 import threading
 import time
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import urlparse, urljoin, parse_qs
 
 import homeassistant.core as ha
 from homeassistant.const import (
@@ -39,6 +40,7 @@ CONF_SERVER_PORT = "server_port"
 CONF_DEVELOPMENT = "development"
 CONF_SSL_CERTIFICATE = 'ssl_certificate'
 CONF_SSL_KEY = 'ssl_key'
+CONF_WEBROOT = "webroot"
 
 DATA_API_PASSWORD = 'api_password'
 
@@ -62,11 +64,18 @@ def setup(hass, config):
     development = str(conf.get(CONF_DEVELOPMENT, "")) == "1"
     ssl_certificate = conf.get(CONF_SSL_CERTIFICATE)
     ssl_key = conf.get(CONF_SSL_KEY)
+    webroot = conf.get(CONF_WEBROOT, "/")
 
     try:
         server = HomeAssistantHTTPServer(
-            (server_host, server_port), RequestHandler, hass, api_password,
-            development, ssl_certificate, ssl_key)
+            server_address=(server_host, server_port),
+            request_handler_class=RequestHandler,
+            hass=hass,
+            api_password=api_password,
+            development=development,
+            webroot=webroot,
+            ssl_certificate=ssl_certificate,
+            ssl_key=ssl_key)
     except OSError:
         # If address already in use
         _LOGGER.exception("Error setting up HTTP server")
@@ -94,13 +103,14 @@ class HomeAssistantHTTPServer(ThreadingMixIn, HTTPServer):
 
     # pylint: disable=too-many-arguments
     def __init__(self, server_address, request_handler_class,
-                 hass, api_password, development, ssl_certificate, ssl_key):
+                 hass, api_password, development, webroot, ssl_certificate, ssl_key):
         super().__init__(server_address, request_handler_class)
 
         self.server_address = server_address
         self.hass = hass
         self.api_password = api_password
         self.development = development
+        self.webroot = os.path.join('/', webroot.rstrip('/')) + '/'
         self.paths = []
         self.sessions = SessionStore()
         self.use_ssl = ssl_certificate is not None
@@ -140,7 +150,16 @@ class HomeAssistantHTTPServer(ThreadingMixIn, HTTPServer):
 
     def register_path(self, method, url, callback, require_auth=True):
         """ Registers a path with the server. """
+        if hasattr(url, 'match'):
+            url = re.compile(self.join_webroot(url.pattern))
+        else:
+            url = self.join_webroot(url)
+        _LOGGER.info('registered: %s', url)
         self.paths.append((method, url, callback, require_auth))
+
+    def join_webroot(self, *parts):
+        parts = [part.lstrip('/') for part in parts]
+        return os.path.join('/', self.webroot, *parts)
 
     def log_message(self, fmt, *args):
         """ Redirect built-in log to HA logging """

@@ -73,6 +73,7 @@ def _handle_get_root(handler, path_match, data):
         template_html = template_file.read()
 
     template_html = template_html.replace('{{ app_url }}', app_url)
+    template_html = template_html.replace('{{ webroot }}', handler.server.webroot)
     template_html = template_html.replace('{{ auth }}', auth)
     template_html = template_html.replace('{{ icons }}', mdi_version.VERSION)
 

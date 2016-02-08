@@ -76,7 +76,7 @@ def request_configuration(network, hass, config):
         description=(
             'Please authorize this app at https://www.ecobee.com/consumer'
             'portal/index.html with pin code: ' + network.pin),
-        description_image="/static/images/config_ecobee_thermostat.png",
+        description_image="static/images/config_ecobee_thermostat.png",
         submit_caption="I have authorized the app."
     )
 

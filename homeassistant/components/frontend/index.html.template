@@ -4,14 +4,15 @@
     <meta charset="utf-8">
     <title>Home Assistant</title>
 
-    <link rel='manifest' href='/static/manifest.json'>
-    <link rel='icon' href='/static/favicon.ico'>
+    <link rel='manifest' href='static/manifest.json'>
+    <link rel='icon' href='static/favicon.ico'>
     <link rel='apple-touch-icon' sizes='180x180'
-          href='/static/favicon-apple-180x180.png'>
+          href='{{ webroot }}static/favicon-apple-180x180.png'>
     <meta name='apple-mobile-web-app-capable' content='yes'>
     <meta name='mobile-web-app-capable' content='yes'>
     <meta name='viewport' content='width=device-width, user-scalable=no'>
     <meta name='theme-color' content='#03a9f4'>
+    <base href='{{ webroot }}'>
     <style>
       #ha-init-skeleton {
         display: -webkit-flex;
@@ -31,10 +32,10 @@
         margin-bottom: 123px;
       }
     </style>
-    <link rel='import' href='/static/{{ app_url }}' async>
+    <link rel='import' href='{{ webroot }}static/{{ app_url }}' async>
   </head>
   <body fullbleed>
-    <div id='ha-init-skeleton'><img src='/static/favicon-192x192.png' height='192'></div>
+    <div id='ha-init-skeleton'><img src='{{ webroot }}static/favicon-192x192.png' height='192'></div>
     <script>
       var webComponentsSupported = ('registerElement' in document &&
                                     'import' in document.createElement('link') &&
@@ -42,7 +43,7 @@
       if (!webComponentsSupported) {
         var script = document.createElement('script')
         script.async = true
-        script.src = '/static/webcomponents-lite.min.js'
+        script.src = '{{ webroot }}static/webcomponents-lite.min.js'
         document.head.appendChild(script)
       }
     </script>
